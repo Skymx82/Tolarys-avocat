@@ -17,8 +17,8 @@ const fadeInUpVariants: Variants = {
   }
 };
 
-// Animation pour les cartes d'audit
-const cardVariants: Variants = {
+// Animation pour les éléments qui apparaissent avec délai
+const delayedFadeInVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
   visible: { 
     opacity: 1, 
@@ -84,7 +84,7 @@ export default function AuditSection() {
             initial="hidden"
             animate={introInView ? "visible" : "hidden"}
           >
-            <span className="text-[#6B4DE6] font-semibold">Maintenant que vous comprenez l'importance d'être visible en ligne</span>, 
+            <span className="text-[#6B4DE6] font-semibold">Maintenant que vous comprenez l&apos;importance d&apos;être visible en ligne</span>, 
             nous mettons à votre disposition un <span className="font-semibold">audit gratuit et personnalisé</span> de votre présence numérique.
           </motion.p>
           <motion.p

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import Link from 'next/link';
 
@@ -111,7 +111,7 @@ export default function AuditPage() {
       formDataObj.append('_to', 'mattias.mathevon@gmail.com');
       
       // Ajouter un sujet personnalisé
-      formDataObj.append('_subject', 'Nouvelle demande d\'audit de site web avocat');
+      formDataObj.append('_subject', 'Nouvelle demande d&apos;audit de site web avocat');
       
       // Envoyer le formulaire via FormSubmit
       const response = await fetch('https://formsubmit.co/mattias.mathevon@gmail.com', {
@@ -124,7 +124,7 @@ export default function AuditPage() {
         setFormStatus({
           submitted: true,
           error: false,
-          message: 'Votre demande d\'audit a été envoyée avec succès. Nous vous contacterons sous 24 à 48 heures.'
+          message: 'Votre demande d&apos;audit a été envoyée avec succès. Nous vous contacterons sous 24 à 48 heures.'
         });
         
         // Réinitialiser le formulaire
@@ -162,16 +162,16 @@ export default function AuditPage() {
   };
 
   // Variants pour les animations
-  const pageVariants = {
+  const pageVariants: Variants = {
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0, transition: { duration: 0.5 } },
     exit: { opacity: 0, y: -20, transition: { duration: 0.3 } }
   };
 
-  const stepVariants = {
+  const stepVariants: Variants = {
     hidden: { opacity: 0, x: 50 },
-    visible: { opacity: 1, x: 0, transition: { duration: 0.4, ease: "easeInOut" } },
-    exit: { opacity: 0, x: -50, transition: { duration: 0.3, ease: "easeInOut" } }
+    visible: { opacity: 1, x: 0, transition: { duration: 0.4, ease: "easeOut" } },
+    exit: { opacity: 0, x: -50, transition: { duration: 0.3, ease: "easeIn" } }
   };
 
   return (
