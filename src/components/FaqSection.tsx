@@ -161,7 +161,7 @@ const FaqSection = () => {
             Vous avez d'autres questions sur la visibilité en ligne de votre cabinet d'avocat ?
           </p>
           <a 
-            href="#audit-form" 
+            href="/audit" 
             className="inline-flex items-center justify-center px-8 py-4 
             text-base font-medium rounded-md text-white bg-[#6B4DE6] hover:bg-[#6B4DE6]/80 
             transition-all shadow-lg hover:shadow-[#6B4DE6]/20"

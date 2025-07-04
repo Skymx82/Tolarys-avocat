@@ -1,7 +1,7 @@
 'use client';
 
-import { useRef } from 'react';
-import { motion, useInView, Variants } from 'framer-motion';
+import { useRef, useState, useEffect } from 'react';
+import { motion, useInView, Variants, useAnimation } from 'framer-motion';
 
 // Animation pour les éléments qui apparaissent au scroll
 const fadeInUpVariants: Variants = {
@@ -42,7 +42,78 @@ const searchExampleVariants: Variants = {
   }
 };
 
+// Interface pour les props du composant TypewriterText
+interface TypewriterTextProps {
+  text: string;
+  delay?: number;
+  className?: string;
+  isVisible?: boolean;
+}
+
+// Effet de frappe au clavier
+const TypewriterText = ({ text, delay = 0, className = "", isVisible = false }: TypewriterTextProps) => {
+  const [displayedText, setDisplayedText] = useState("");
+  
+  useEffect(() => {
+    if (!isVisible) {
+      setDisplayedText("");
+      return;
+    }
+    
+    let currentIndex = 0;
+    const fullText = text;
+    let typingTimer: NodeJS.Timeout;
+    
+    // Délai initial avant de commencer à taper
+    const initialDelay = setTimeout(() => {
+      // Fonction pour ajouter un caractère à la fois
+      const typeNextChar = () => {
+        if (currentIndex < fullText.length) {
+          setDisplayedText(fullText.substring(0, currentIndex + 1));
+          currentIndex++;
+          
+          // Vitesse de frappe aléatoire pour un effet plus naturel
+          const typingSpeed = Math.random() * 50 + 30; // Entre 30ms et 80ms
+          typingTimer = setTimeout(typeNextChar, typingSpeed);
+        }
+      };
+      
+      typeNextChar();
+    }, delay);
+    
+    return () => {
+      clearTimeout(initialDelay);
+      clearTimeout(typingTimer);
+    };
+  }, [text, delay, isVisible]);
+  
+  return <span className={className}>{displayedText}<span className="animate-pulse">|</span></span>;
+};
+
 export default function CrucialSection() {
+  // État pour l'animation du compteur
+  const [count, setCount] = useState(0);
+  
+  // États pour les animations de frappe
+  const [searchQueries] = useState([
+    {
+      query: "avocat droit de la famille à Paris",
+      stats: "Environ 5 400 recherches mensuelles"
+    },
+    {
+      query: "avocat spécialisé divorce près de chez moi",
+      stats: "Environ 3 200 recherches mensuelles"
+    },
+    {
+      query: "meilleur avocat droit du travail Lyon",
+      stats: "Environ 2 800 recherches mensuelles"
+    },
+    {
+      query: "avocat succession héritage consultation",
+      stats: "Environ 1 900 recherches mensuelles"
+    }
+  ]);
+  
   // Références pour détecter quand les éléments sont visibles
   const titleRef = useRef(null);
   const statsRef = useRef(null);
@@ -54,6 +125,33 @@ export default function CrucialSection() {
   const statsInView = useInView(statsRef, { once: true, amount: 0.3 });
   const journeyInView = useInView(journeyRef, { once: true, amount: 0.3 });
   const searchInView = useInView(searchRef, { once: true, amount: 0.3 });
+  
+  // Animation du compteur de 0 à 78%
+  useEffect(() => {
+    if (statsInView) {
+      let startTime: number | null = null;
+      const duration = 2500; // 2.5 secondes en millisecondes
+      const finalValue = 78;
+      
+      const animateCount = (timestamp: number): void => {
+        if (!startTime) startTime = timestamp;
+        const progress = timestamp - startTime;
+        
+        // Calculer la valeur actuelle basée sur le temps écoulé
+        const currentValue = Math.min(Math.floor((progress / duration) * finalValue), finalValue);
+        setCount(currentValue);
+        
+        // Continuer l'animation jusqu'à atteindre la durée ou la valeur finale
+        if (progress < duration && currentValue < finalValue) {
+          requestAnimationFrame(animateCount);
+        } else {
+          setCount(finalValue); // S'assurer que la valeur finale est exactement 78
+        }
+      };
+      
+      requestAnimationFrame(animateCount);
+    }
+  }, [statsInView]);
 
   return (
     <section className="py-16 md:py-24 lg:py-32 bg-white relative overflow-hidden text-gray-800">
@@ -91,7 +189,7 @@ export default function CrucialSection() {
             initial="hidden"
             animate={statsInView ? "visible" : "hidden"}
           >
-            <div className="text-5xl md:text-6xl font-bold text-[#6B4DE6] mb-4">78%</div>
+            <div className="text-5xl md:text-6xl font-bold text-[#6B4DE6] mb-4">{count}%</div>
             <p className="text-xl md:text-2xl text-gray-700">des justiciables recherchent leur avocat en ligne avant de prendre rendez-vous</p>
           </motion.div>
         </div>
@@ -170,81 +268,40 @@ export default function CrucialSection() {
           </motion.h3>
           
           <div className="max-w-3xl mx-auto">
-            {/* Exemple 1 */}
-            <motion.div 
-              className="mb-4 bg-gray-50 rounded-lg p-4 flex items-center"
-              variants={searchExampleVariants}
-              initial="hidden"
-              animate={searchInView ? "visible" : "hidden"}
-              transition={{ delay: 0.1 }}
-            >
-              <div className="mr-4 text-gray-400">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </div>
-              <div>
-                <p className="font-medium">avocat droit de la famille à Paris</p>
-                <p className="text-sm text-gray-500">Environ 5 400 recherches mensuelles</p>
-              </div>
-            </motion.div>
-            
-            {/* Exemple 2 */}
-            <motion.div 
-              className="mb-4 bg-gray-50 rounded-lg p-4 flex items-center"
-              variants={searchExampleVariants}
-              initial="hidden"
-              animate={searchInView ? "visible" : "hidden"}
-              transition={{ delay: 0.2 }}
-            >
-              <div className="mr-4 text-gray-400">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </div>
-              <div>
-                <p className="font-medium">avocat spécialisé divorce près de chez moi</p>
-                <p className="text-sm text-gray-500">Environ 3 200 recherches mensuelles</p>
-              </div>
-            </motion.div>
-            
-            {/* Exemple 3 */}
-            <motion.div 
-              className="mb-4 bg-gray-50 rounded-lg p-4 flex items-center"
-              variants={searchExampleVariants}
-              initial="hidden"
-              animate={searchInView ? "visible" : "hidden"}
-              transition={{ delay: 0.3 }}
-            >
-              <div className="mr-4 text-gray-400">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </div>
-              <div>
-                <p className="font-medium">meilleur avocat droit du travail Lyon</p>
-                <p className="text-sm text-gray-500">Environ 2 800 recherches mensuelles</p>
-              </div>
-            </motion.div>
-            
-            {/* Exemple 4 */}
-            <motion.div 
-              className="bg-gray-50 rounded-lg p-4 flex items-center"
-              variants={searchExampleVariants}
-              initial="hidden"
-              animate={searchInView ? "visible" : "hidden"}
-              transition={{ delay: 0.4 }}
-            >
-              <div className="mr-4 text-gray-400">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </div>
-              <div>
-                <p className="font-medium">avocat succession héritage consultation</p>
-                <p className="text-sm text-gray-500">Environ 1 900 recherches mensuelles</p>
-              </div>
-            </motion.div>
+            {/* Exemples de recherche avec effet de frappe */}
+            {searchQueries.map((item, index) => (
+              <motion.div 
+                key={`search-${index}`}
+                className="mb-4 bg-gray-50 rounded-lg p-4 flex items-center"
+                variants={searchExampleVariants}
+                initial="hidden"
+                animate={searchInView ? "visible" : "hidden"}
+                transition={{ delay: 0.1 * (index + 1) }}
+              >
+                <div className="mr-4 text-gray-400">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                <div className="w-full">
+                  <p className="font-medium">
+                    <TypewriterText 
+                      text={item.query} 
+                      delay={500 + index * 1000} 
+                      isVisible={searchInView} 
+                    />
+                  </p>
+                  <motion.p 
+                    className="text-sm text-gray-500"
+                    initial={{ opacity: 0 }}
+                    animate={searchInView ? { opacity: 1 } : { opacity: 0 }}
+                    transition={{ delay: 0.5 + (index * 1000 + item.query.length * 50) / 1000 }}
+                  >
+                    {item.stats}
+                  </motion.p>
+                </div>
+              </motion.div>
+            ))}
           </div>
         </div>
       </div>

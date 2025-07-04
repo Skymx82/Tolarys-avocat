@@ -51,7 +51,7 @@ export default function Navbar() {
             Accueil
           </Link>
           <Link 
-            href="#audit-form" 
+            href="/audit" 
             className="bg-[#6B4DE6] hover:bg-[#5A3DD3] text-white px-5 py-2 rounded-md transition-colors"
           >
             Audit gratuit

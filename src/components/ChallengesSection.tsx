@@ -1,44 +1,137 @@
 'use client';
 
-import { useRef } from 'react';
-import { motion, Variants } from 'framer-motion';
+import { useRef, useState, useEffect } from 'react';
+import { motion, Variants, AnimatePresence } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 
 const ChallengesSection = () => {
   // Variants pour les animations
   const fadeInUpVariants: Variants = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, y: 30 },
     visible: { 
       opacity: 1, 
       y: 0,
       transition: {
-        duration: 0.6,
-        ease: "easeOut"
+        duration: 0.7,
+        ease: [0.22, 1, 0.36, 1] // Ease out quint pour un effet plus dynamique
       }
     }
   };
 
-  const staggerChildrenVariants: Variants = {
+  const highlightVariants: Variants = {
+    hidden: { scale: 0.95, opacity: 0 },
+    visible: { 
+      scale: 1, 
+      opacity: 1,
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 15
+      }
+    }
+  };
+
+  const staggerContainerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.2
+        staggerChildren: 0.15,
+        delayChildren: 0.2
       }
     }
   };
 
+  const floatVariants: Variants = {
+    hidden: { y: 0 },
+    visible: { 
+      y: [-5, 5, -5],
+      transition: {
+        repeat: Infinity,
+        duration: 3,
+        ease: "easeInOut"
+      }
+    }
+  };
+  
+  const pulseVariants: Variants = {
+    hidden: { scale: 1 },
+    visible: { 
+      scale: [1, 1.05, 1],
+      transition: {
+        repeat: Infinity,
+        duration: 2,
+        ease: "easeInOut"
+      }
+    }
+  };
+  
+  const slideInVariants: Variants = {
+    hidden: { x: -20, opacity: 0 },
+    visible: { 
+      x: 0, 
+      opacity: 1,
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 20
+      }
+    }
+  };
+
+  // État pour le carrousel
+  const [activeSlide, setActiveSlide] = useState(0);
+  const carouselRef = useRef<HTMLDivElement>(null);
+  
   // Références pour les animations basées sur le scroll
   const [titleRef, titleInView] = useInView({ triggerOnce: true, threshold: 0.3 });
   const [challengesRef, challengesInView] = useInView({ triggerOnce: true, threshold: 0.2 });
-  const [ethicsRef, ethicsInView] = useInView({ triggerOnce: true, threshold: 0.3 });
-  const [credibilityRef, credibilityInView] = useInView({ triggerOnce: true, threshold: 0.3 });
+  const [ethicsRef, ethicsInView] = useInView({ triggerOnce: true, threshold: 0.2 });
+  const [statsRef, statsInView] = useInView({ triggerOnce: true, threshold: 0.2 });
+  
+  // Fonction pour naviguer vers une slide spécifique
+  const goToSlide = (index: number) => {
+    setActiveSlide(index);
+    if (carouselRef.current) {
+      const slideWidth = 250 + 16; // largeur de slide + espace (min-w-[250px] + space-x-4)
+      carouselRef.current.scrollTo({
+        left: index * slideWidth,
+        behavior: 'smooth'
+      });
+    }
+  };
+  
+  // Détecter le changement de slide lors du défilement manuel
+  useEffect(() => {
+    const handleScroll = () => {
+      if (carouselRef.current) {
+        const scrollPosition = carouselRef.current.scrollLeft;
+        const slideWidth = 250 + 16; // largeur de slide + espace
+        const newActiveSlide = Math.round(scrollPosition / slideWidth);
+        if (newActiveSlide !== activeSlide) {
+          setActiveSlide(newActiveSlide);
+        }
+      }
+    };
+    
+    const carousel = carouselRef.current;
+    if (carousel) {
+      carousel.addEventListener('scroll', handleScroll);
+    }
+    
+    return () => {
+      if (carousel) {
+        carousel.removeEventListener('scroll', handleScroll);
+      }
+    };
+  }, [activeSlide]);
 
-  // Données des défis
+  // Données des défis simplifiées
   const challenges = [
     {
-      title: "Concurrence accrue",
-      description: "Plus de 70 000 avocats en France se disputent la visibilité en ligne, avec une concentration particulière dans les grandes villes.",
+      title: "70 000+",
+      highlight: "Concurrence",
+      description: "Avocats se disputent la visibilité en ligne",
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-[#6B4DE6]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -46,8 +139,9 @@ const ChallengesSection = () => {
       )
     },
     {
-      title: "Attentes des clients",
-      description: "Les justiciables s'attendent à trouver facilement des informations sur votre expertise et à pouvoir vous contacter rapidement.",
+      title: "Instantané",
+      highlight: "Impatience",
+      description: "Les clients veulent des réponses immédiates",
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-[#6B4DE6]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -55,8 +149,9 @@ const ChallengesSection = () => {
       )
     },
     {
-      title: "Évolution constante",
-      description: "Les algorithmes de recherche et les bonnes pratiques web évoluent rapidement, nécessitant une adaptation continue.",
+      title: "Constante",
+      highlight: "Évolution",
+      description: "Les algorithmes changent, votre site doit s'adapter",
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-[#6B4DE6]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -65,38 +160,77 @@ const ChallengesSection = () => {
     }
   ];
 
-  // Données des contraintes déontologiques
+  // Données des contraintes déontologiques simplifiées
   const ethicsPoints = [
     {
       title: "Publicité encadrée",
-      description: "Le Conseil National des Barreaux autorise la communication mais encadre strictement la publicité des avocats.",
-      solution: "Nous créons des contenus informatifs qui respectent ces règles tout en valorisant votre expertise."
+      key: "Communication informative sans démarchage",
+      solution: "Contenus qui valorisent votre expertise sans publicité agressive"
     },
     {
-      title: "Protection du secret professionnel",
-      description: "Impossible de mentionner des clients ou affaires spécifiques dans vos communications.",
-      solution: "Nous mettons en avant votre expertise de manière générale, avec des exemples anonymisés et des cas d'école."
+      title: "Secret professionnel",
+      key: "Pas de mention de clients spécifiques",
+      solution: "Expertise générale et cas d'école anonymisés"
     },
     {
-      title: "Dignité et modération",
-      description: "Votre communication doit rester sobre et digne, sans promesses de résultats.",
-      solution: "Notre approche minimaliste et professionnelle garantit le respect de ces principes."
+      title: "Dignité professionnelle",
+      key: "Communication sobre, sans promesses",
+      solution: "Design élégant et contenu mesuré"
     }
   ];
 
-  // Données sur l'importance d'un site professionnel
-  const credibilityPoints = [
+  // Références individuelles pour chaque point d'éthique (pour animation progressive au scroll)
+  const ethics1Ref = useRef(null);
+  const ethics2Ref = useRef(null);
+  const ethics3Ref = useRef(null);
+  const [ethics1InView, setEthics1InView] = useState(false);
+  const [ethics2InView, setEthics2InView] = useState(false);
+  const [ethics3InView, setEthics3InView] = useState(false);
+  
+  // Observer pour détecter quand les éléments entrent dans la vue
+  useEffect(() => {
+    const options = {
+      root: null,
+      rootMargin: '-50px 0px',
+      threshold: 0.2
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.target === ethics1Ref.current) {
+          setEthics1InView(entry.isIntersecting);
+        } else if (entry.target === ethics2Ref.current) {
+          setEthics2InView(entry.isIntersecting);
+        } else if (entry.target === ethics3Ref.current) {
+          setEthics3InView(entry.isIntersecting);
+        }
+      });
+    }, options);
+
+    if (ethics1Ref.current) observer.observe(ethics1Ref.current);
+    if (ethics2Ref.current) observer.observe(ethics2Ref.current);
+    if (ethics3Ref.current) observer.observe(ethics3Ref.current);
+
+    return () => {
+      if (ethics1Ref.current) observer.unobserve(ethics1Ref.current);
+      if (ethics2Ref.current) observer.unobserve(ethics2Ref.current);
+      if (ethics3Ref.current) observer.unobserve(ethics3Ref.current);
+    };
+  }, []);
+  
+  // Statistiques percutantes
+  const stats = [
     {
       percentage: "89%",
-      description: "des clients potentiels consultent votre site web avant de vous contacter"
+      description: "consultent votre site avant contact"
     },
     {
       percentage: "75%",
-      description: "jugent de votre professionnalisme à travers la qualité de votre site"
+      description: "jugent votre professionnalisme par votre site"
     },
     {
       percentage: "63%",
-      description: "des visiteurs quittent un site qui n'est pas adapté aux mobiles"
+      description: "quittent un site non adapté aux mobiles"
     }
   ];
 
@@ -127,10 +261,10 @@ const ChallengesSection = () => {
           </motion.p>
         </div>
         
-        {/* Défis spécifiques */}
+        {/* Défis spécifiques - visible uniquement sur desktop */}
         <div 
           ref={challengesRef} 
-          className="mb-20 md:mb-28"
+          className="hidden md:block mb-20 md:mb-28"
         >
           <motion.h3
             className="text-2xl md:text-3xl font-bold text-gray-800 mb-8 text-center"
@@ -143,7 +277,7 @@ const ChallengesSection = () => {
           
           <motion.div
             className="grid grid-cols-1 md:grid-cols-3 gap-8"
-            variants={staggerChildrenVariants}
+            variants={staggerContainerVariants}
             initial="hidden"
             animate={challengesInView ? "visible" : "hidden"}
           >
@@ -177,57 +311,228 @@ const ChallengesSection = () => {
             Respecter les contraintes déontologiques
           </motion.h3>
           
-          <motion.div
-            className="space-y-8"
-            variants={staggerChildrenVariants}
-            initial="hidden"
-            animate={ethicsInView ? "visible" : "hidden"}
-          >
-            {ethicsPoints.map((point, index) => (
+          <div className="space-y-12">
+            {/* Point 1 */}
+            <div ref={ethics1Ref}>
               <motion.div
-                key={index}
-                className="bg-white rounded-lg p-6 shadow-sm"
-                variants={fadeInUpVariants}
+                className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden"
+                initial={{ opacity: 0, y: 50 }}
+                animate={ethics1InView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+                transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                whileHover={{ scale: 1.01 }}
               >
-                <div className="flex flex-col md:flex-row md:items-start">
+                {/* Élément décoratif animé en arrière-plan */}
+                <motion.div 
+                  className="absolute top-0 right-0 w-24 h-24 bg-[#6B4DE6]/5 rounded-full -mr-8 -mt-8 z-0"
+                  variants={pulseVariants}
+                  animate="visible"
+                />
+                
+                <div className="flex flex-col md:flex-row md:items-start relative z-10">
                   <div className="flex-shrink-0 mb-4 md:mb-0 md:mr-6">
-                    <div className="w-12 h-12 rounded-full bg-[#6B4DE6]/10 flex items-center justify-center">
-                      <span className="text-xl font-bold text-[#6B4DE6]">{index + 1}</span>
-                    </div>
+                    <motion.div 
+                      className="w-12 h-12 rounded-full bg-[#6B4DE6]/10 flex items-center justify-center"
+                      whileHover={{ scale: 1.1, backgroundColor: 'rgba(107, 77, 230, 0.2)' }}
+                      transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                    >
+                      <span className="text-xl font-bold text-[#6B4DE6]">1</span>
+                    </motion.div>
                   </div>
-                  <div>
-                    <h4 className="text-xl font-semibold text-gray-800 mb-2">{point.title}</h4>
-                    <p className="text-gray-700 mb-4">{point.description}</p>
-                    <div className="bg-[#f9f8ff] p-4 rounded-md border-l-4 border-[#6B4DE6]">
-                      <p className="text-gray-700"><span className="font-semibold">Notre solution :</span> {point.solution}</p>
-                    </div>
+                  <div className="flex-1">
+                    <motion.h4 
+                      className="text-xl font-semibold text-gray-800 mb-2"
+                      variants={slideInVariants}
+                      initial="hidden"
+                      animate={ethics1InView ? "visible" : "hidden"}
+                    >
+                      {ethicsPoints[0].title}
+                    </motion.h4>
+                    <motion.p 
+                      className="text-gray-700 mb-4"
+                      variants={slideInVariants}
+                      initial="hidden"
+                      animate={ethics1InView ? "visible" : "hidden"}
+                      transition={{ delay: 0.1 }}
+                    >
+                      {ethicsPoints[0].key}
+                    </motion.p>
+                    <motion.div 
+                      className="bg-[#f9f8ff] p-4 rounded-md border-l-4 border-[#6B4DE6] transform-gpu"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={ethics1InView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                      transition={{ delay: 0.3, duration: 0.5 }}
+                      whileHover={{ x: 5, boxShadow: '0 4px 12px rgba(107, 77, 230, 0.15)' }}
+                    >
+                      <p className="text-gray-700">
+                        <motion.span 
+                          className="font-semibold text-[#6B4DE6]"
+                          animate={{ color: ['#6B4DE6', '#8A70FF', '#6B4DE6'] }}
+                          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                        >
+                          Notre solution :
+                        </motion.span> {ethicsPoints[0].solution}
+                      </p>
+                    </motion.div>
                   </div>
                 </div>
               </motion.div>
-            ))}
-          </motion.div>
+            </div>
+            
+            {/* Point 2 */}
+            <div ref={ethics2Ref}>
+              <motion.div
+                className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden"
+                initial={{ opacity: 0, y: 50 }}
+                animate={ethics2InView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+                transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                whileHover={{ scale: 1.01 }}
+              >
+                {/* Élément décoratif animé en arrière-plan */}
+                <motion.div 
+                  className="absolute top-0 right-0 w-24 h-24 bg-[#6B4DE6]/5 rounded-full -mr-8 -mt-8 z-0"
+                  variants={pulseVariants}
+                  animate="visible"
+                />
+                
+                <div className="flex flex-col md:flex-row md:items-start relative z-10">
+                  <div className="flex-shrink-0 mb-4 md:mb-0 md:mr-6">
+                    <motion.div 
+                      className="w-12 h-12 rounded-full bg-[#6B4DE6]/10 flex items-center justify-center"
+                      whileHover={{ scale: 1.1, backgroundColor: 'rgba(107, 77, 230, 0.2)' }}
+                      transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                    >
+                      <span className="text-xl font-bold text-[#6B4DE6]">2</span>
+                    </motion.div>
+                  </div>
+                  <div className="flex-1">
+                    <motion.h4 
+                      className="text-xl font-semibold text-gray-800 mb-2"
+                      variants={slideInVariants}
+                      initial="hidden"
+                      animate={ethics2InView ? "visible" : "hidden"}
+                    >
+                      {ethicsPoints[1].title}
+                    </motion.h4>
+                    <motion.p 
+                      className="text-gray-700 mb-4"
+                      variants={slideInVariants}
+                      initial="hidden"
+                      animate={ethics2InView ? "visible" : "hidden"}
+                      transition={{ delay: 0.1 }}
+                    >
+                      {ethicsPoints[1].key}
+                    </motion.p>
+                    <motion.div 
+                      className="bg-[#f9f8ff] p-4 rounded-md border-l-4 border-[#6B4DE6] transform-gpu"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={ethics2InView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                      transition={{ delay: 0.3, duration: 0.5 }}
+                      whileHover={{ x: 5, boxShadow: '0 4px 12px rgba(107, 77, 230, 0.15)' }}
+                    >
+                      <p className="text-gray-700">
+                        <motion.span 
+                          className="font-semibold text-[#6B4DE6]"
+                          animate={{ color: ['#6B4DE6', '#8A70FF', '#6B4DE6'] }}
+                          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                        >
+                          Notre solution :
+                        </motion.span> {ethicsPoints[1].solution}
+                      </p>
+                    </motion.div>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+            
+            {/* Point 3 */}
+            <div ref={ethics3Ref}>
+              <motion.div
+                className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden"
+                initial={{ opacity: 0, y: 50 }}
+                animate={ethics3InView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+                transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                whileHover={{ scale: 1.01 }}
+              >
+                {/* Élément décoratif animé en arrière-plan */}
+                <motion.div 
+                  className="absolute top-0 right-0 w-24 h-24 bg-[#6B4DE6]/5 rounded-full -mr-8 -mt-8 z-0"
+                  variants={pulseVariants}
+                  animate="visible"
+                />
+                
+                <div className="flex flex-col md:flex-row md:items-start relative z-10">
+                  <div className="flex-shrink-0 mb-4 md:mb-0 md:mr-6">
+                    <motion.div 
+                      className="w-12 h-12 rounded-full bg-[#6B4DE6]/10 flex items-center justify-center"
+                      whileHover={{ scale: 1.1, backgroundColor: 'rgba(107, 77, 230, 0.2)' }}
+                      transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                    >
+                      <span className="text-xl font-bold text-[#6B4DE6]">3</span>
+                    </motion.div>
+                  </div>
+                  <div className="flex-1">
+                    <motion.h4 
+                      className="text-xl font-semibold text-gray-800 mb-2"
+                      variants={slideInVariants}
+                      initial="hidden"
+                      animate={ethics3InView ? "visible" : "hidden"}
+                    >
+                      {ethicsPoints[2].title}
+                    </motion.h4>
+                    <motion.p 
+                      className="text-gray-700 mb-4"
+                      variants={slideInVariants}
+                      initial="hidden"
+                      animate={ethics3InView ? "visible" : "hidden"}
+                      transition={{ delay: 0.1 }}
+                    >
+                      {ethicsPoints[2].key}
+                    </motion.p>
+                    <motion.div 
+                      className="bg-[#f9f8ff] p-4 rounded-md border-l-4 border-[#6B4DE6] transform-gpu"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={ethics3InView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                      transition={{ delay: 0.3, duration: 0.5 }}
+                      whileHover={{ x: 5, boxShadow: '0 4px 12px rgba(107, 77, 230, 0.15)' }}
+                    >
+                      <p className="text-gray-700">
+                        <motion.span 
+                          className="font-semibold text-[#6B4DE6]"
+                          animate={{ color: ['#6B4DE6', '#8A70FF', '#6B4DE6'] }}
+                          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                        >
+                          Notre solution :
+                        </motion.span> {ethicsPoints[2].solution}
+                      </p>
+                    </motion.div>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          </div>
         </div>
         
         {/* Importance d'un site professionnel */}
-        <div ref={credibilityRef}>
+        <div ref={statsRef}>
           <motion.h3
             className="text-2xl md:text-3xl font-bold text-gray-800 mb-8 text-center"
             variants={fadeInUpVariants}
             initial="hidden"
-            animate={credibilityInView ? "visible" : "hidden"}
+            animate={statsInView ? "visible" : "hidden"}
           >
             L'importance d'un site professionnel pour votre crédibilité
           </motion.h3>
           
+          {/* Version desktop: grid normale */}
           <motion.div
-            className="grid grid-cols-1 md:grid-cols-3 gap-8"
-            variants={staggerChildrenVariants}
+            className="hidden md:grid md:grid-cols-3 gap-8"
+            variants={staggerContainerVariants}
             initial="hidden"
-            animate={credibilityInView ? "visible" : "hidden"}
+            animate={statsInView ? "visible" : "hidden"}
           >
-            {credibilityPoints.map((point, index) => (
+            {stats.map((point, index) => (
               <motion.div
-                key={index}
+                key={`desktop-${index}`}
                 className="bg-white rounded-lg p-6 shadow-sm text-center"
                 variants={fadeInUpVariants}
               >
@@ -237,18 +542,62 @@ const ChallengesSection = () => {
             ))}
           </motion.div>
           
+          {/* Version mobile: carrousel horizontal */}
+          <div className="md:hidden">
+            <motion.div 
+              className="overflow-x-auto scrollbar-hide pb-4"
+              variants={fadeInUpVariants}
+              initial="hidden"
+              animate={statsInView ? "visible" : "hidden"}
+              ref={carouselRef}
+            >
+              <div className="flex space-x-4 w-max px-4">
+                {stats.map((point, index) => (
+                  <motion.div
+                    key={`mobile-${index}`}
+                    className="bg-white rounded-lg p-6 shadow-sm text-center min-w-[250px] flex-shrink-0"
+                    variants={fadeInUpVariants}
+                    initial="hidden"
+                    animate={statsInView ? "visible" : "hidden"}
+                    transition={{ delay: index * 0.1 }}
+                  >
+                    <h4 className="text-4xl font-bold text-[#6B4DE6] mb-4">{point.percentage}</h4>
+                    <p className="text-gray-700">{point.description}</p>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+            
+            {/* Points de navigation en dehors de la zone de défilement */}
+            <motion.div 
+              className="flex justify-center mt-4 space-x-2"
+              variants={fadeInUpVariants}
+              initial="hidden"
+              animate={statsInView ? "visible" : "hidden"}
+            >
+              {stats.map((_, index) => (
+                <button
+                  key={`dot-${index}`}
+                  onClick={() => goToSlide(index)}
+                  className={`h-2 w-2 rounded-full transition-all duration-300 ${activeSlide === index ? 'bg-[#6B4DE6] scale-125' : 'bg-[#6B4DE6] opacity-40'}`}
+                  aria-label={`Voir statistique ${index + 1}`}
+                ></button>
+              ))}
+            </motion.div>
+          </div>
+          
           <motion.div
             className="mt-12 text-center"
             variants={fadeInUpVariants}
             initial="hidden"
-            animate={credibilityInView ? "visible" : "hidden"}
+            animate={statsInView ? "visible" : "hidden"}
             transition={{ delay: 0.4 }}
           >
             <p className="text-lg text-gray-700 max-w-3xl mx-auto mb-8">
               Un site web professionnel n'est pas seulement une vitrine, c'est un outil essentiel pour établir votre crédibilité et rassurer vos clients potentiels sur votre expertise et votre professionnalisme.
             </p>
             <a 
-              href="#audit-form" 
+              href="/audit" 
               className="inline-flex items-center justify-center px-8 py-4 
               text-base font-medium rounded-md text-white bg-[#6B4DE6] hover:bg-[#6B4DE6]/80 
               transition-all shadow-lg hover:shadow-[#6B4DE6]/20"

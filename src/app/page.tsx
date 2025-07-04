@@ -3,7 +3,6 @@ import CrucialSection from "../components/CrucialSection";
 import AuditSection from "../components/AuditSection";
 import TrustSection from "../components/TrustSection";
 import ChallengesSection from "../components/ChallengesSection";
-import CtaSection from "../components/CtaSection";
 import FaqSection from "../components/FaqSection";
 import Footer from "../components/Footer";
 import Script from "next/script";
@@ -61,11 +60,10 @@ export default function Home() {
         <meta itemProp="keywords" content="création site web avocat, site internet cabinet avocat, marketing digital juridique, site web avocat déontologie, référencement avocat" />
         
         <HeroSection />
+        <TrustSection />
         <CrucialSection />
         <AuditSection />
-        <TrustSection />
         <ChallengesSection />
-        <CtaSection />
         <FaqSection />
       </main>
       <Footer />

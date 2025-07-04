@@ -178,7 +178,7 @@ export default function HeroSection() {
               className="flex flex-col gap-4 pt-4 md:pt-6 w-full sm:w-auto"
             >
               <a 
-                href="#audit-form" 
+                href="/audit" 
                 className="inline-flex items-center justify-center px-6 py-4 sm:py-3 
                 text-base font-medium rounded-md text-white bg-[#6B4DE6] hover:bg-[#6B4DE6]/80 
                 transition-all shadow-lg hover:shadow-[#6B4DE6]/20 w-full sm:w-auto"
