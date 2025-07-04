@@ -21,8 +21,8 @@ export default function Home() {
         "@context": "https://schema.org",
         "@type": "ProfessionalService",
         "name": "Tolarys - Création de sites web pour avocats",
-        "url": "https://www.tolarys-toulouse.fr",
-        "logo": "https://www.tolarys-toulouse.fr/logo.png",
+        "url": "https://avocat.tolarys-toulouse.fr",
+        "logo": "https://avocat.tolarys-toulouse.fr/logo.png",
         "description": "Tolarys crée des sites web pour avocats respectant les règles déontologiques. Développez votre présence en ligne et attirez de nouveaux clients grâce à nos solutions digitales sur-mesure.",
         "address": {
           "@type": "PostalAddress",
